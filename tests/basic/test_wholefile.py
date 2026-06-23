@@ -325,8 +325,11 @@ after b
 
         files = [file1]
 
+        # ensure InputOutput has a valid history file to avoid Path(None) errors
+        _, hist_file = tempfile.mkstemp()
+
         # Initialize the Coder object with the mocked IO and mocked repo
-        coder = Coder.create(self.GPT35, "whole", io=InputOutput(), fnames=files, stream=False)
+        coder = Coder.create(self.GPT35, "whole", io=InputOutput(input_history_file=hist_file), fnames=files, stream=False)
 
         # no trailing newline so the response content below doesn't add ANOTHER newline
         new_content = "new\ntwo\nthree"

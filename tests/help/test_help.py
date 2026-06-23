@@ -49,12 +49,16 @@ class TestHelp(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        io = InputOutput(pretty=False, yes=True)
+        import tempfile
+        tmp = tempfile.NamedTemporaryFile(delete=False)
+        tmp_path = tmp.name
+        tmp.close()
+        cls.io = InputOutput(pretty=False, yes=True, input_history_file=tmp_path)
 
         GPT35 = Model("gpt-3.5-turbo")
 
-        coder = Coder.create(GPT35, None, io)
-        commands = Commands(io, coder)
+        coder = Coder.create(GPT35, None, cls.io)
+        commands = Commands(cls.io, coder)
 
         help_coder_run = MagicMock(return_value="")
         aider.coders.HelpCoder.run = help_coder_run
@@ -74,11 +78,11 @@ class TestHelp(unittest.TestCase):
         help_coder_run.assert_called_once()
 
     def test_init(self):
-        help_inst = Help()
+        help_inst = Help(io=self.io)
         self.assertIsNotNone(help_inst.retriever)
 
     def test_ask_without_mock(self):
-        help_instance = Help()
+        help_instance = Help(io=self.io)
         question = "What is aider?"
         result = help_instance.ask(question)
 
